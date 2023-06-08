@@ -28,6 +28,23 @@ jobs:
           repository: Tushar-ops23/angularjs-application
           ref: main
 
+      - name: SSH into EC2 and deploy
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          EC2_HOST: ${{ secrets.EC2_HOST }}
+          EC2_USERNAME: ${{ secrets.EC2_USERNAME }}
+        run: |
+          echo "$SSH_PRIVATE_KEY" > key.pem
+          chmod 600 key.pem
+          ssh -o StrictHostKeyChecking=no -i key.pem ${EC2_USERNAME}@${EC2_HOST} '
+            sudo apt-get update
+            sudo apt-get -y --fix-broken install docker.io
+            docker pull angularjs
+            docker stop angularjs || true
+            docker rm angularjs || true
+            docker run -d --name angularjs -p 80:80 angularjs
+          '
+
       - name: Build and deploy Docker image
         run: |
           docker build -t angularjs .
@@ -40,18 +57,3 @@ jobs:
       - name: Expose container on port 80
         run: |
           docker exec -d angularjs nginx -g 'daemon off;'
-
-      - name: Deploy to EC2
-        env:
-          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-          EC2_HOST: ${{ secrets.EC2_HOST }}
-          EC2_USERNAME: ${{ secrets.EC2_USERNAME }}
-        run: |
-          echo "$SSH_PRIVATE_KEY" > key.pem
-          chmod 600 key.pem
-          ssh -o StrictHostKeyChecking=no -i key.pem ${EC2_USERNAME}@${EC2_HOST} '
-            docker pull angularjs
-            docker stop angularjs || true
-            docker rm angularjs || true
-            docker run -d --name angularjs -p 80:80 angularjs
-          '
