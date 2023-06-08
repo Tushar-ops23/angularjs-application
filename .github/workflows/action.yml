@@ -43,6 +43,6 @@ jobs:
       - name: Tag and push Docker image
         run: |
          IMAGE_ID=$(docker images -q angularjs)
-         docker tag $IMAGE_ID $DOCKER_USERNAME/angularjs-application:v1.0
+         docker tag $IMAGE_ID angularjs-application/angularjs:v1.0
          docker push $DOCKER_USERNAME/angularjs-application:v1.0
 
