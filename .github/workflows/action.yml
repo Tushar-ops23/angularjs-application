@@ -27,9 +27,12 @@ jobs:
         run: |
           git clone https://github.com/Tushar-ops23/angularjs-application.git
           cd angularjs-application
-          docker build -t angularjs .
-          docker run -d -p 80:80 angularjs
+         
+            script: |
+             docker build -t angularjs .
+             docker run -d -p 80:80 angularjs
       
+         
       - name: Log in to Docker Hub
         env:
           DOCKER_USERNAME: ${{ secrets.DOCKERU_NAME }}
