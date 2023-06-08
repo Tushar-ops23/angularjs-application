@@ -1,4 +1,4 @@
-name: Install Docker on EC2
+name: Install Docker on EC2 and Build Docker Image
 
 on:
   push:
@@ -6,7 +6,7 @@ on:
       - main
 
 jobs:
-  install-docker:
+  install-docker-build-image:
     runs-on: ubuntu-latest
 
     steps:
@@ -22,3 +22,29 @@ jobs:
             sudo apt-get update
             sudo apt-get -y --fix-broken install docker.io
           '
+
+      - name: Clone repository
+        run: |
+          git clone https://github.com/Tushar-ops23/angularjs-application.git
+          cd angularjs-application
+
+      - name: Build Docker image
+        run: |
+          docker build -t angularjs .
+          docker run -d --name angularjs -p 80:80 angularjs
+          
+      - name: Log in to Docker Hub
+        env:
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+        run: |
+          echo $DOCKER_PASSWORD | docker login --username $DOCKER_USERNAME --password-stdin
+
+      - name: Tag and push Docker image
+        run: |
+          docker tag angularjs $DOCKER_USERNAME/angularjs:latest
+          docker push $DOCKER_USERNAME/angularjs:latest
+
+          
+
+    
