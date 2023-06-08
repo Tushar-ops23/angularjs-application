@@ -22,15 +22,15 @@ jobs:
         run: |
           ssh -o StrictHostKeyChecking=no -i ${{ secrets.SSH_PRIVATE_KEY }} ${EC2_USERNAME}@${EC2_HOST} '
             sudo apt-get update
-            sudo apt-get install -y docker.io'
+            sudo apt-get install docker.io -y'
 
       - name: Build Docker image
         run: docker build -t angular .
 
       - name: Log in to Docker Hub
         env:
-          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+          DOCKER_USERNAME: ${{ secrets.DOCKERU_NAME }}
+          DOCKER_PASSWORD: ${{ secrets.DOCKERU_PASS }}
         run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
 
       - name: Push Docker image
