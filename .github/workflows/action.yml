@@ -13,7 +13,7 @@ jobs:
       - name: Install Docker
         run: |
           sudo apt-get update
-          sudo apt-get -y install docker.io
+          sudo apt-get -y --fix-broken install docker.io
 
       - name: Set up Docker Hub credentials
         env:
