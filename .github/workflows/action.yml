@@ -42,5 +42,5 @@ jobs:
 
       - name: Tag and push Docker image
         run: |
-          docker tag angularjs $DOCKER_USERNAME/angularjs:second
-          docker push $DOCKER_USERNAME/angularjs:second
+          docker tag angularjs $DOCKER_USERNAME/angularjs-application:second
+          docker push $DOCKER_USERNAME/angularjs-application:second
