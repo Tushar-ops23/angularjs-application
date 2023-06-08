@@ -37,13 +37,12 @@ jobs:
           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
           DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
         run: |
-          echo $DOCKER_PASSWORD | docker login --username $DOCKER_USERNAME --password-stdin
+          echo "$DOCKER_PASSWORD" | docker login --username "$DOCKER_USERNAME" --password-stdin
+
+      - name: Build Docker image
+        run: docker build -t angularjs .
 
       - name: Tag and push Docker image
         run: |
           docker tag angularjs $DOCKER_USERNAME/angularjs:latest
           docker push $DOCKER_USERNAME/angularjs:latest
-
-          
-
-    
