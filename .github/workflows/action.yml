@@ -21,14 +21,14 @@ jobs:
           ssh -o StrictHostKeyChecking=no -i key.pem ${EC2_USERNAME}@${EC2_HOST} '
             sudo apt-get update
             sudo apt-get -y --fix-broken install docker.io
-      - name: Clone the repository 
-        run: git clone git@github.com:Tushar-ops23/angularjs-application.git
+          '
 
-      - name: Build Docker image
+      - name: Clone repository
         run: |
+          git clone https://github.com/Tushar-ops23/angularjs-application.git
           cd angularjs-application
-          docker build -t angularjs-application .
-          docker run -d -p 80:80 angularjs-application
+          docker build -t angularjs .
+          docker run -d -p 80:80 angularjs
       
       - name: Log in to Docker Hub
         env:
@@ -38,9 +38,9 @@ jobs:
           echo "$DOCKER_PASSWORD" | docker login --username "$DOCKER_USERNAME" --password-stdin
 
       - name: Build Docker image
-        run: docker build -t angularjs-application .
+        run: docker build -t angularjs .
 
       - name: Tag and push Docker image
         run: |
-          docker tag angularjs $DOCKER_USERNAME/angularjs-application:latest
-          docker push $DOCKER_USERNAME/angularjs-application:latest
+          docker tag angularjs $DOCKER_USERNAME/angularjs:latest
+          docker push $DOCKER_USERNAME/angularjs:latest
