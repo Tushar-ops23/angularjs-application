@@ -1,4 +1,4 @@
-name: Build and Deploy Docker Image to EC2
+name: Build and Deploy Docker Image
 
 on:
   push:
@@ -6,42 +6,30 @@ on:
       - main
 
 jobs:
-  deploy:
+  build-and-deploy:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
 
-      - name: Set up SSH key
-        uses: appleboy/ssh-action@v0.4.0
-        with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USERNAME }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-
-      - name: Install Docker on EC2
-        run: |
-          ssh -o StrictHostKeyChecking=no ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} '
-            sudo apt-get update
-            sudo apt-get install -y docker.io'
-
       - name: Build Docker image
-        run: docker build -t your_image_name:latest .
+        run: docker build -t tusharops023/angular .
 
       - name: Log in to Docker Hub
+        run: docker login -u ${{ secrets.DOCKERU_NAME }} -p ${{ secrets.D_PASS }}
+
+      - name: Push Docker image to Docker Hub
+        run: docker push ritikvirus/springboot_application:first
+
+      - name: Deploy to EC2
         env:
-          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
-        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
-
-      - name: Push Docker image
-        run: docker push your_image_name:latest
-
-      - name: Deploy container to EC2
+          PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          HOSTNAME: ${{ secrets.EC2_HOST }}
+          USER_NAME: ${{ secrets.EC2_USERNAME }}
         run: |
-          ssh -o StrictHostKeyChecking=no ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} '
-            docker stop your_container_name || true
-            docker rm your_container_name || true
-            docker pull your_image_name:latest
-            docker run -d -p 80:80 --name your_container_name your_image_name:latest'
+          echo "$PRIVATE_KEY" > key.pem && chmod 600 key.pem
+          ssh -o StrictHostKeyChecking=no -i key.pem ${USER_NAME}@${HOSTNAME} '
+            cd /home/ubuntu &&
+            sudo docker pull tusharops-23/springboot_application:first &&
+            sudo docker run -d -p 80:80 --name angularjs tusharops023/angular'
