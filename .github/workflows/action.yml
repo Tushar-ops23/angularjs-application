@@ -14,23 +14,25 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Set up SSH key
-        uses: webfactory/ssh-agent@v0.5.0
+        uses: appleboy/ssh-action@v0.4.0
         with:
-          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
 
       - name: Install Docker on EC2
         run: |
-          ssh -o StrictHostKeyChecking=no -i ${{ secrets.SSH_PRIVATE_KEY }} ${EC2_USERNAME}@${EC2_HOST} '
+          ssh -o StrictHostKeyChecking=no ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} '
             sudo apt-get update
-            sudo apt-get install docker.io -y'
+            sudo apt-get install -y docker.io'
 
       - name: Build Docker image
-        run: docker build -t angular .
+        run: docker build -t your_image_name:latest .
 
       - name: Log in to Docker Hub
         env:
-          DOCKER_USERNAME: ${{ secrets.DOCKERU_NAME }}
-          DOCKER_PASSWORD: ${{ secrets.DOCKERU_PASS }}
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
         run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
 
       - name: Push Docker image
@@ -38,8 +40,8 @@ jobs:
 
       - name: Deploy container to EC2
         run: |
-          ssh -o StrictHostKeyChecking=no -i ${{ secrets.SSH_PRIVATE_KEY }} ${EC2_USERNAME}@${EC2_HOST} '
+          ssh -o StrictHostKeyChecking=no ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} '
             docker stop your_container_name || true
             docker rm your_container_name || true
             docker pull your_image_name:latest
-            docker run -d -p 80:80 --name fuckoff angular'
+            docker run -d -p 80:80 --name your_container_name your_image_name:latest'
