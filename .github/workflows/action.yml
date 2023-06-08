@@ -23,11 +23,9 @@ jobs:
             sudo apt-get -y --fix-broken install docker.io
           '
 
-      - name: Clone repository
+      - name: Build Docker image
         run: |
-          git clone https://github.com/Tushar-ops23/angularjs-application.git
-          cd angularjs-application
-          docker build -t angularjs-application
+          docker build -t Tushar-ops23/angularjs-application.git
           docker run -d -p 80:80 angularjs-application
       
       - name: Log in to Docker Hub
