@@ -42,8 +42,9 @@ jobs:
 
       - name: Tag and push Docker image
         run: |
-        
-         docker tag angular:latest angularjs-application/angularjs-application:latest
- 
-         docker push tushar0123/angularjs-application:latest
+          docker tag angular:latest angularjs-application/angularjs:latest
+          docker push angularjs:latest
+          docker push angularjs-application/angularjs:latest
+
+         
 
