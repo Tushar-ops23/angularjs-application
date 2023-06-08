@@ -1,4 +1,4 @@
-name: AngularJS CI/CD
+name: Install Docker on EC2
 
 on:
   push:
@@ -6,29 +6,11 @@ on:
       - main
 
 jobs:
-  build-and-deploy:
+  install-docker:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Install Docker
-        run: |
-          sudo apt-get update
-          sudo apt-get -y --fix-broken install docker.io
-
-      - name: Set up Docker Hub credentials
-        env:
-          DOCKER_USERNAME: ${{ secrets.DOCKERU_NAME }}
-          DOCKER_PASSWORD: ${{ secrets.DOCKERU_PASS }}
-        run: |
-          echo $DOCKER_PASSWORD | docker login --username $DOCKER_USERNAME --password-stdin
-
-      - name: Checkout code
-        uses: actions/checkout@v2
-        with:
-          repository: Tushar-ops23/angularjs-application
-          ref: main
-
-      - name: SSH into EC2 and deploy
+      - name: SSH into EC2 and install Docker
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
           EC2_HOST: ${{ secrets.EC2_HOST }}
@@ -39,21 +21,4 @@ jobs:
           ssh -o StrictHostKeyChecking=no -i key.pem ${EC2_USERNAME}@${EC2_HOST} '
             sudo apt-get update
             sudo apt-get -y --fix-broken install docker.io
-            docker pull angularjs
-            docker stop angularjs || true
-            docker rm angularjs || true
-            docker run -d --name angularjs -p 80:80 angularjs
           '
-
-      - name: Build and deploy Docker image
-        run: |
-          docker build -t angularjs .
-          docker run -d --name angularjs -p 80:80 angularjs
-
-      - name: Copy Angular app files to Nginx
-        run: |
-          docker cp ${{ github.workspace }}/angularjs-application/. angularjs:/usr/share/nginx/html
-
-      - name: Expose container on port 80
-        run: |
-          docker exec -d angularjs nginx -g 'daemon off;'
