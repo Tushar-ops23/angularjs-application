@@ -1,45 +1,45 @@
-name: Install Docker on EC2 and Build Docker Image
+name: Build and Deploy Docker Image to EC2
 
 on:
   push:
     branches:
       - main
+
 jobs:
-  install-docker-build-image:
+  deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - name: SSH into EC2 and install Docker
-        env:
-          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-          EC2_HOST: ${{ secrets.EC2_HOST }}
-          EC2_USERNAME: ${{ secrets.EC2_USERNAME }}
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up SSH key
+        uses: webfactory/ssh-agent@v0.5.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Install Docker on EC2
         run: |
-          echo "$SSH_PRIVATE_KEY" > key.pem
-          chmod 600 key.pem
-          ssh -o StrictHostKeyChecking=no -i key.pem ${EC2_USERNAME}@${EC2_HOST} '
+          ssh -o StrictHostKeyChecking=no -i ${{ secrets.SSH_PRIVATE_KEY }} ${EC2_USERNAME}@${EC2_HOST} '
             sudo apt-get update
-            sudo apt-get -y --fix-broken install docker.io'
-            
-             - name: Clone repository
-           run: |
-          git clone https://github.com/Tushar-ops23/angularjs-application.git
-          cd angularjs-application
-         
-            script: |
-             docker build -t angularjs .
-             docker run -d -p 80:80 angularjs
-      
+            sudo apt-get install -y docker.io'
+
+      - name: Build Docker image
+        run: docker build -t angular .
 
       - name: Log in to Docker Hub
         env:
-          DOCKER_USERNAME: ${{ secrets.DOCKERU_NAME }}
-          DOCKER_PASSWORD: ${{ secrets.DOCKERU_PASS }}
-        run: |
-          echo "$DOCKER_PASSWORD" | docker login --username "$DOCKER_USERNAME" --password-stdin
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
 
-      - name: Tag and push Docker image
+      - name: Push Docker image
+        run: docker push your_image_name:latest
+
+      - name: Deploy container to EC2
         run: |
-          docker tag angularjs:latest angularjs-application/angularjs:latest
-          docker push angularjs:latest
-          docker push angularjs-application/angularjs:latest
+          ssh -o StrictHostKeyChecking=no -i ${{ secrets.SSH_PRIVATE_KEY }} ${EC2_USERNAME}@${EC2_HOST} '
+            docker stop your_container_name || true
+            docker rm your_container_name || true
+            docker pull your_image_name:latest
+            docker run -d -p 80:80 --name fuckoff angular'
