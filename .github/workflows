@@ -1,0 +1,57 @@
+name: AngularJS CI/CD
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Install Docker
+        run: |
+          sudo apt-get update
+          sudo apt-get -y install docker.io
+
+      - name: Set up Docker Hub credentials
+        env:
+          DOCKER_USERNAME: ${{ secrets.DOCKERU_NAME }}
+          DOCKER_PASSWORD: ${{ secrets.DOCKERU_PASS }}
+        run: |
+          echo $DOCKER_PASSWORD | docker login --username $DOCKER_USERNAME --password-stdin
+
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          repository: Tushar-ops23/angularjs-application
+          ref: main
+
+      - name: Build and deploy Docker image
+        run: |
+          docker build -t angularjs .
+          docker run -d --name angularjs -p 80:80 angularjs
+
+      - name: Copy Angular app files to Nginx
+        run: |
+          docker cp ${{ github.workspace }}/angularjs-application/. angularjs:/usr/share/nginx/html
+
+      - name: Expose container on port 80
+        run: |
+          docker exec -d angularjs nginx -g 'daemon off;'
+
+      - name: Deploy to EC2
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_KEY }}
+          EC2_HOST: ${{ secrets.EC2_HOST }}
+          EC2_USERNAME: ${{ secrets.EC2_USERNAME }}
+        run: |
+          echo "$SSH_PRIVATE_KEY" > key.pem
+          chmod 600 key.pem
+          ssh -o StrictHostKeyChecking=no -i key.pem ${EC2_USERNAME}@${EC2_HOST} '
+            docker pull angularjs
+            docker stop angularjs || true
+            docker rm angularjs || true
+            docker run -d --name angularjs -p 80:80 angularjs
+          '
