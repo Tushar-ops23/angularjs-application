@@ -14,13 +14,13 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Build Docker image
-        run: docker build -t tusharops023/angular .
+        run: docker build -t tushar0123/angular .
 
       - name: Log in to Docker Hub
         run: docker login -u ${{ secrets.DOCKERU_NAME }} -p ${{ secrets.D_PASS }}
 
       - name: Push Docker image to Docker Hub
-        run: docker push ritikvirus/springboot_application:first
+        run: docker push tushar0123/angularjs_application:first
 
       - name: Deploy to EC2
         env:
@@ -31,5 +31,5 @@ jobs:
           echo "$PRIVATE_KEY" > key.pem && chmod 600 key.pem
           ssh -o StrictHostKeyChecking=no -i key.pem ${USER_NAME}@${HOSTNAME} '
             cd /home/ubuntu &&
-            sudo docker pull tusharops-23/springboot_application:first &&
+            sudo docker pull tushar0123/angularjs-application:first &&
             sudo docker run -d -p 80:80 --name angularjs tusharops023/angular'
