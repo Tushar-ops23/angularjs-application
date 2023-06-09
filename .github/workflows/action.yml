@@ -31,5 +31,5 @@ jobs:
           echo "$PRIVATE_KEY" > key.pem && chmod 600 key.pem
           ssh -o StrictHostKeyChecking=no -i key.pem ${USER_NAME}@${HOSTNAME} '
             cd /home/ubuntu &&
-            sudo docker pull tushar0123/angularjs-application:first &&
+            sudo docker pull tushar0123/angular &&
             sudo docker run -d -p 80:80 --name angularjs tusharops023/angular'
