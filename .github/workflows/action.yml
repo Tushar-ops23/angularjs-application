@@ -32,6 +32,5 @@ jobs:
           ssh -o StrictHostKeyChecking=no -i key.pem ${USER_NAME}@${HOSTNAME} 
           run: |
             docker stop $(docker ps -aq)
-            cd /home/ubuntu &&
-            sudo docker pull tushar0123/angular:latest &&
-            sudo docker run -d -p 80:80 --name angular tushar0123/angular:latest'
+             sudo docker pull tushar0123/angular:latest
+             sudo docker run -d -p 80:80 --name angular tushar0123/angular:latest'
