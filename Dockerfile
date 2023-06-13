@@ -23,7 +23,7 @@ FROM nginx
 WORKDIR /usr/share/nginx/html
 
 # Copy the built app from the builder stage to the NGINX web server directory
-COPY --from=builder app/dist/my-first-project /usr/share/nginx/html
+COPY --from=builder app/dist/my-first-project /usr/share/nginx/html/dashboard
 
 # Expose the default NGINX port
 EXPOSE 80
